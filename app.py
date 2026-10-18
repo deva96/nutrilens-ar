@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
@@ -124,15 +125,39 @@ with col2:
                     Pay special attention to regional Indian and Asian dishes (e.g., biryani, dosa, idli, sambar, Nei Sukka, curries, parotta) and hidden cooking oils/ghee.
                     Return accurate macro estimates and a concise, encouraging 1-2 sentence voice whisper telling the user how this plate fits their remaining {remaining_cal} kcal budget.
                     """
-                    response = client.models.generate_content(
-                        model="gemini-3.8-flash",
-                        contents=[img, prompt],
-                        config=types.GenerateContentConfig(
-                            response_mime_type="application/json",
-                            response_schema=SmartGlassesHUDResponse,
-                            temperature=0.2,
-                        ),
-                    )
+                    # Robust execution with automatic retry & fallback for high-traffic spikes (503/429)
+                    candidate_models = ["gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-3.8-pro"]
+                    response = None
+                    used_model = None
+                    last_err = None
+
+                    for model_candidate in candidate_models:
+                        for attempt in range(2):
+                            try:
+                                response = client.models.generate_content(
+                                    model=model_candidate,
+                                    contents=[img, prompt],
+                                    config=types.GenerateContentConfig(
+                                        response_mime_type="application/json",
+                                        response_schema=SmartGlassesHUDResponse,
+                                        temperature=0.2,
+                                    ),
+                                )
+                                used_model = model_candidate
+                                break
+                            except Exception as e:
+                                last_err = e
+                                err_msg = str(e)
+                                if "503" in err_msg or "UNAVAILABLE" in err_msg or "429" in err_msg:
+                                    time.sleep(1.5)
+                                    continue
+                                break
+                        if response:
+                            break
+
+                    if not response:
+                        raise last_err
+
                     data = json.loads(response.text)
 
                     if not data.get("meal_detected", True):
