@@ -63,7 +63,7 @@ class SmartGlassesHUDResponse(BaseModel):
 # --- SIDEBAR: SMART GLASSES TELEMETRY & USER PROFILE ---
 with st.sidebar:
     st.markdown("### 🕶️ NutriLens OS v2.6")
-    st.caption("Connected: Gemini 2.5 Flash Live Edge Node")
+    st.caption("Connected: Gemini 3.8 Flash Live Edge Node")
     daily_target = st.slider("Daily Calorie Target (kcal)", 1500, 3500, 2850, step=50)
     consumed_so_far = st.number_input("Calories Consumed Today (kcal)", 0, 3500, 1450, step=50)
     protein_target = st.slider("Daily Protein Target (g)", 50, 220, 140, step=5)
@@ -125,7 +125,7 @@ with col2:
                     Return accurate macro estimates and a concise, encouraging 1-2 sentence voice whisper telling the user how this plate fits their remaining {remaining_cal} kcal budget.
                     """
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-3.8-flash",
                         contents=[img, prompt],
                         config=types.GenerateContentConfig(
                             response_mime_type="application/json",
