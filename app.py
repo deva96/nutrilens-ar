@@ -110,8 +110,10 @@ with col2:
     st.subheader("⚡ Augmented Reality Lens Overlay (HUD)")
     if image_file:
         api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key and "GEMINI_API_KEY" in st.secrets:
+            api_key = st.secrets["GEMINI_API_KEY"]
         if not api_key:
-            st.error("Missing GEMINI_API_KEY environment variable. Set it in Cloud Run or locally.")
+            st.error("Missing GEMINI_API_KEY environment variable. Set it in Cloud Run, Streamlit Secrets, or locally.")
         else:
             with st.spinner("Gemini Vision analyzing POV frame & computing macro telemetry..."):
                 try:
