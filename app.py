@@ -658,5 +658,4 @@ def run_ui():
             </div>
             """, unsafe_allow_html=True)
 
-if __name__ == "__main__":
-    run_ui()
+run_ui()
